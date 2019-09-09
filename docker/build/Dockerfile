@@ -33,7 +33,7 @@ RUN pip install --ignore-installed "setuptools>=3.4.4"; \
 COPY $DOCKYARD_SRC/bin $DOCKYARD_SRVPROJ/bin
 
 # copy jar
-COPY $DOCKYARD_SRC/target/aws-batch-1.0.jar $DOCKYARD_SRVPROJ/jars/batch.jar
+COPY $DOCKYARD_SRC/target/docker-1.0.jar $DOCKYARD_SRVPROJ/jars/batch.jar
 
 # create user
 RUN useradd --create-home --shell /bin/bash batch

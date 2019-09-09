@@ -30,4 +30,31 @@ let record = {
     }
 };
 
+/*{
+    "jobDefinitionName": "batch-test",
+    "jobDefinitionArn": "arn:aws:batch:us-west-1:089600871681:job-definition/batch-test:1",
+    "revision": 1,
+    "status": "ACTIVE",
+    "type": "container",
+    "parameters": {},
+    "retryStrategy": {
+    "attempts": 1
+},
+    "containerProperties": {
+    "image": "089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:latest",
+        "vcpus": 1,
+        "memory": 128,
+        "command": [],
+        "jobRoleArn": "arn:aws:iam::089600871681:role/aws-batch-101",
+        "volumes": [],
+        "environment": [],
+        "mountPoints": [],
+        "ulimits": [],
+        "resourceRequirements": []
+},
+    "timeout": {
+    "attemptDurationSeconds": 60
+}
+}*/
+
 lambda.handler(record, {});
