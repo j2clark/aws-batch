@@ -5,10 +5,15 @@
     <groupId>info.j2clark</groupId>
     <artifactId>aws-batch</artifactId>
     <version>1.0</version>
-    
+    <packaging>pom</packaging>
+
     <properties>
         <aws-version>[1.11.514,2.0.0)</aws-version>
     </properties>
+
+    <modules>
+        <module>docker</module>
+    </modules>
 
    
     <repositories>
