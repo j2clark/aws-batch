@@ -73,10 +73,10 @@ Resources:
           const AWS = require('aws-sdk');
           const batch = new AWS.Batch();
           exports.handler = function (event, context, callback) {
+
+            let jobId = event.pathParameters['id'];
             let params = {
-              jobs: [
-                "261774ad-c0da-4c96-99d6-3828f064a3f8"
-              ]
+              jobs: [jobId]
             };
 
             batch.describeJobs(params, function(err, data) {
@@ -92,17 +92,14 @@ Resources:
                   }
                 });
               } else {
-                // successful response
-                //console.log(data);
+                let job = {};
+                if (data.jobs.length > 0) {
+                  job = data.jobs[0];
+                }
 
-                let jobs = [];
-                data.jobs.forEach(function(job) {
-                  console.log(job);
-                  jobs.push(job);
-                });
                 callback(null, {
                   statusCode: '200',
-                  body: JSON.stringify(jobs),
+                  body: JSON.stringify(job),
                   headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Credentials": "true"
