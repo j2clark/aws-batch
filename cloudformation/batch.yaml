@@ -65,6 +65,112 @@ Resources:
         - Order: 1
           ComputeEnvironment: !Ref BatchJobCompute
 
+  GetBatchJobFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const batch = new AWS.Batch();
+          exports.handler = function (event, context, callback) {
+            let params = {
+              jobs: [
+                "261774ad-c0da-4c96-99d6-3828f064a3f8"
+              ]
+            };
+
+            batch.describeJobs(params, function(err, data) {
+              if (err) {
+                // an error occurred
+                console.log(err, err.stack);
+                callback(null, {
+                  statusCode: '500',
+                  body: JSON.stringify({}),
+                  headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": "true"
+                  }
+                });
+              } else {
+                // successful response
+                //console.log(data);
+
+                let jobs = [];
+                data.jobs.forEach(function(job) {
+                  console.log(job);
+                  jobs.push(job);
+                });
+                callback(null, {
+                  statusCode: '200',
+                  body: JSON.stringify(jobs),
+                  headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": "true"
+                  }
+                });
+              }
+            });
+          }
+      Description: "List Batch Jobs Function"
+      FunctionName: "batch-job-get"
+      Role: !GetAtt "LambdaIAMRole.Arn"
+      Handler: index.handler
+      Runtime: "nodejs8.10"
+      Timeout: 15
+
+  GetBatchJobsFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const batch = new AWS.Batch();
+          exports.handler = function (event, context, callback) {
+            let params = {
+              jobQueue: 'batch-api-queue',
+              jobStatus: 'SUCCEEDED',
+              maxResults: '10',
+            };
+
+            batch.listJobs(params, function(err, data) {
+              if (err) {
+                // an error occurred
+                console.log(err, err.stack);
+                callback(null, {
+                  statusCode: '500',
+                  body: JSON.stringify({}),
+                  headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": "true"
+                  }
+                });
+              } else {
+                // successful response
+                //console.log(data);
+
+                let jobs = [];
+                data.jobSummaryList.forEach(function(job) {
+                  console.log(job);
+                  jobs.push(job);
+                });
+                callback(null, {
+                  statusCode: '200',
+                  body: JSON.stringify(jobs),
+                  headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": "true"
+                  }
+                });
+              }
+            });
+          }
+      Description: "List Batch Jobs Function"
+      FunctionName: "batch-job-get-all"
+      Role: !GetAtt "LambdaIAMRole.Arn"
+      Handler: index.handler
+      Runtime: "nodejs8.10"
+      Timeout: 15
+
 
   # https://stackoverflow.com/questions/57158200/api-gateway-integration-with-aws-batch
   PostBatchJobFunction:
@@ -193,6 +299,8 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "batch:SubmitJob"
+                  - "batch:ListJobs"
+                  - "batch:DescribeJobs"
                 Resource: "*"
   ### IAM ROLES - END
 
