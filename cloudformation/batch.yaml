@@ -1,7 +1,23 @@
 Description: >
   Docker Batch Configuration
 
-#Parameters:
+Parameters:
+  # API GATEWAY PARAMS - BEGIN
+  ApiGatewayStageName:
+    Type: String
+    Default: "prod"
+    AllowedValues:
+      - 'prod'
+  CORSAllowHeaders:
+    Type: String
+    Default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  CORSAllowMethods:
+    Type: String
+    Default: "'DELETE,GET,HEAD,POST,OPTIONS,PUT,PATCH'"
+  CORSAllowOrigin:
+    Type: String
+    Default: "'*'"
+  # API GATEWAY PARAMS - END
 
 #Metadata:
 
@@ -11,7 +27,7 @@ Resources:
     Type: AWS::Batch::JobDefinition
     Properties:
       Type: container
-      JobDefinitionName: batch-test-cf
+      JobDefinitionName: batch-api-job
       ContainerProperties:
         Image: 089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:latest
         Vcpus: 1
@@ -23,7 +39,7 @@ Resources:
   BatchJobCompute:
     Type: AWS::Batch::ComputeEnvironment
     Properties:
-      ComputeEnvironmentName: batch-test-compute-cf
+      ComputeEnvironmentName: batch-api-compute
       Type: MANAGED
       ServiceRole: arn:aws:iam::089600871681:role/service-role/AWSBatchServiceRole
       ComputeResources:
@@ -44,7 +60,147 @@ Resources:
     Type: AWS::Batch::JobQueue
     Properties:
       Priority: 1
-      JobQueueName: batch-test-cf
+      JobQueueName: batch-api-queue
       ComputeEnvironmentOrder:
         - Order: 1
           ComputeEnvironment: !Ref BatchJobCompute
+
+
+  # https://stackoverflow.com/questions/57158200/api-gateway-integration-with-aws-batch
+  PostBatchJobFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const batch = new AWS.Batch();
+          exports.handler = function (event, context, callback) {
+
+            var params = {
+              jobDefinition: "batch-api-job",
+              jobName: "batch-api-job-lambda",
+              jobQueue: "batch-api-queue"
+            };
+            batch.submitJob(params, function(err, data) {
+              if (err) {
+                // an error occurred
+                console.log(err, err.stack);
+              } else {
+                // successful response
+                console.log(data);
+              }
+            });
+
+            callback(null, {
+              statusCode: '200',
+              body: JSON.stringify({}),
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": "true"
+              }
+            });
+          }
+      Description: "Post Batch Job Function"
+      FunctionName: "batch-job-post"
+      Role: !GetAtt "LambdaIAMRole.Arn"
+      Handler: index.handler
+      Runtime: "nodejs8.10"
+      Timeout: 15
+
+
+  # API for executing jobs
+  ApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "batch"
+      Description: "Batch Job Web Application Services"
+
+
+  # CORS Support
+  # Each resource must contain an OPTIONS method which returns CORS specific headers
+  RootOptions:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "OPTIONS"
+      ResourceId: !GetAtt "ApiGateway.RootResourceId"
+      RestApiId: !Ref "ApiGateway"
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: !Sub "${CORSAllowHeaders}"
+              method.response.header.Access-Control-Allow-Methods: !Sub "${CORSAllowMethods}"
+              method.response.header.Access-Control-Allow-Origin: !Sub "${CORSAllowOrigin}"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  PostJob:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      ResourceId: !GetAtt "ApiGateway.RootResourceId"
+      RestApiId: !Ref "ApiGateway"
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "PostBatchJobFunction.Arn"
+
+  ### IAM ROLES - BEGIN
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    #    RoleName: "books-lambda-role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Policies:
+        - PolicyName: "lambda"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+        - PolicyName: "dynamo"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "batch:SubmitJob"
+                Resource: "*"
+  ### IAM ROLES - END
+
+  ### LAMBDA-API GATEWAY PERMISSIONS
+  InvokePostJob:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt "PostBatchJobFunction.Arn"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/POST/*"
