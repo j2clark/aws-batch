@@ -75,6 +75,7 @@ Resources:
           exports.handler = function (event, context, callback) {
 
             let jobId = event.pathParameters['id'];
+            console.log('JobId['+jobId+']');
             let params = {
               jobs: [jobId]
             };
@@ -123,10 +124,22 @@ Resources:
           const AWS = require('aws-sdk');
           const batch = new AWS.Batch();
           exports.handler = function (event, context, callback) {
+
+            let status = 'SUCCEEDED';
+            let maxResults = '10'
+            if (event.queryStringParameters['status']) {
+              status = event.queryStringParameters['status'];
+            }
+            if (event.queryStringParameters['maxResults']) {
+              maxResults = event.queryStringParameters['maxResults'];
+            }
+            //let statii = event.multiValueQueryStringParameters['statii'];
+            console.log('Status: ' + status);
+            console.log('MaxResults: ' + maxResults);
             let params = {
               jobQueue: 'batch-api-queue',
-              jobStatus: 'SUCCEEDED',
-              maxResults: '10',
+              jobStatus: status,
+              maxResults: maxResults,
             };
 
             batch.listJobs(params, function(err, data) {
