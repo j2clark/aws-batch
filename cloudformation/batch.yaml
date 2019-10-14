@@ -253,10 +253,46 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
+  JobsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref "ApiGateway"
+      ParentId: !GetAtt "ApiGateway.RootResourceId"
+      PathPart: 'jobs'
+
+  JobsOptions:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "OPTIONS"
+      ResourceId: !Ref "JobsResource"
+      RestApiId: !Ref "ApiGateway"
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: !Sub "${CORSAllowHeaders}"
+              method.response.header.Access-Control-Allow-Methods: !Sub "${CORSAllowMethods}"
+              method.response.header.Access-Control-Allow-Origin: !Sub "${CORSAllowOrigin}"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
   PostJob:
     Type: "AWS::ApiGateway::Method"
     Properties:
-      ResourceId: !GetAtt "ApiGateway.RootResourceId"
+      ResourceId: !Ref "JobsResource"
       RestApiId: !Ref "ApiGateway"
       AuthorizationType: "AWS_IAM"
       HttpMethod: "POST"
@@ -266,6 +302,70 @@ Resources:
         Uri: !Sub
           - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
           - lambdaArn: !GetAtt "PostBatchJobFunction.Arn"
+
+  ListJobs:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      ResourceId: !Ref "JobsResource"
+      RestApiId: !Ref "ApiGateway"
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "GET"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "GetBatchJobsFunction.Arn"
+
+  JobResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref "ApiGateway"
+      ParentId: !Ref "JobsResource"
+      PathPart: '{id}'
+
+  JobOptions:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "OPTIONS"
+      ResourceId: !Ref "JobResource"
+      RestApiId: !Ref "ApiGateway"
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: !Sub "${CORSAllowHeaders}"
+              method.response.header.Access-Control-Allow-Methods: !Sub "${CORSAllowMethods}"
+              method.response.header.Access-Control-Allow-Origin: !Sub "${CORSAllowOrigin}"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  GetJob:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      ResourceId: !Ref "JobResource"
+      RestApiId: !Ref "ApiGateway"
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "GET"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "GetBatchJobFunction.Arn"
 
   ### IAM ROLES - BEGIN
   LambdaIAMRole:
@@ -312,3 +412,19 @@ Resources:
       FunctionName: !GetAtt "PostBatchJobFunction.Arn"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/POST/*"
+
+  InvokeListJobs:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt "GetBatchJobsFunction.Arn"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/GET/*"
+
+  InvokeGetJob:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt "GetBatchJobFunction.Arn"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/GET/*"
