@@ -1,5 +1,15 @@
 # to build docker image:
-# docker build -f build/Dockerfile -t aws-batch
+# docker build -f build/Dockerfile -t j2clark.com/aws-batch:1.0
+
+# tag image for AWS ECR
+# docker tag j2clark.com/aws-batch:1.0 089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:1.0
+
+# log in to ECR (copy and paste response)
+# aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email
+
+# push image
+# docker push 089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:1.0
+# docker push 089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:latest
 
 FROM openjdk:8
 
