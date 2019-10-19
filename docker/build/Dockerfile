@@ -1,3 +1,6 @@
+# to build docker image:
+# docker build -f build/Dockerfile -t aws-batch
+
 FROM openjdk:8
 
 MAINTAINER Jamie Clark <j2clark@gmail.com>
