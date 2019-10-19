@@ -7,11 +7,14 @@ env:
 #  parameter-store:
 #    LOGIN_PASSWORD: /CodeBuild/dockerLoginPassword
 
+# when configuring build in aws, there is option to choose environment
+# ubunutu seems more flexible? or at least better examples exist
+# fr example, aws doesn't support apt-get
+
 phases:
   install:
     runtime-versions:
-#      java: openjdk8
-      java: corretto8
+      java: openjdk8
     commands:
       - echo Entered the install phase...
       - apt-get update -y
