@@ -14,19 +14,19 @@ ENV DOCKYARD_SRVPROJ=/srv/batch
 # Home directory
 ENV BATCH_HOME=$DOCKYARD_SRVPROJ
 
-RUN apt-get update && \
-    apt-get install -y python-pip && \
-    apt-get install -y sudo && \
-    pip install awscli && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN apt-get update && \
+#    apt-get install -y python-pip && \
+#    apt-get install -y sudo && \
+#    pip install awscli && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # install python dependencies
-RUN mkdir -p $DOCKYARD_SRVPROJ/build
-COPY $DOCKYARD_SRC/build/requirements.txt $DOCKYARD_SRVPROJ/build/requirements.txt
+#RUN mkdir -p $DOCKYARD_SRVPROJ/build
+#COPY $DOCKYARD_SRC/build/requirements.txt $DOCKYARD_SRVPROJ/build/requirements.txt
 
-RUN pip install --ignore-installed "setuptools>=3.4.4"; \
-    pip install -r $DOCKYARD_SRVPROJ/build/requirements.txt
+#RUN pip install --ignore-installed "setuptools>=3.4.4"; \
+#    pip install -r $DOCKYARD_SRVPROJ/build/requirements.txt
 
 # copy config files
 COPY $DOCKYARD_SRC/docker/bin $DOCKYARD_SRVPROJ/bin
