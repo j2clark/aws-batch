@@ -42,11 +42,11 @@ artifacts:
   files:
     - batch/target/batch-1.0.jar
   discard-paths: yes
-#  secondary-artifacts:
-#    artifact1:
-#      files:
-#        - target/messageUtil-1.0.jar
-#      discard-paths: yes
+  secondary-artifacts:
+    artifact1:
+      files:
+        - cloudformation/batch.yaml
+      discard-paths: yes
 #    artifact2:
 #      files:
 #        - target/messageUtil-1.0.jar
