@@ -22,6 +22,8 @@ phases:
     finally:
       - echo This always runs even if the update or install command fails
   pre_build:
+    # policy had to be added to codebuild role to allow ECR access
+    # see bottom of  https://docs.aws.amazon.com/AmazonECR/latest/userguide/RepositoryPolicyExamples.html
     commands:
       - echo Entered the pre_build phase...
 #      - docker login –u User –p $LOGIN_PASSWORD
@@ -38,7 +40,7 @@ phases:
       - echo Entered the build phase...
       - echo Build started on `date`
       - mvn install
-      - docker build -t $REPOSITORY_URI:latest ./docker
+      - docker build -t $REPOSITORY_URI:latest ./docker/build/
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
     finally:
       - echo This always runs even if the install command fails
