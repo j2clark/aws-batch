@@ -12,6 +12,13 @@ env:
 # fr example, aws doesn't support apt-get
 
 phases:
+  prebuild:
+    - echo Logging in to Amazon ECR...
+    - aws --version
+    - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+    - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
+    - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+    - IMAGE_TAG=${COMMIT_HASH:=latest}
   install:
     runtime-versions:
       java: openjdk8
@@ -32,6 +39,8 @@ phases:
       - echo Entered the build phase...
       - echo Build started on `date`
       - mvn install
+      - docker build -t $REPOSITORY_URI:latest ./docker
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
     finally:
       - echo This always runs even if the install command fails
   post_build:
