@@ -56,17 +56,18 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 artifacts:
   files:
-    - batch/target/batch-1.0.jar
+    - 'batch/target/batch-1.0.jar'
   discard-paths: yes
   secondary-artifacts:
     # must add this to build artifacts
     cloudformation:
       files:
-        - cloudformation/batch.yaml
+        - 'cloudformation/batch.yaml'
       discard-paths: yes
     lambda:
       files:
-      - lambda/src/**/*
+      - 'lambda/src/**/*'
+      base-directory: 'lambda/src'
       discard-paths: no
 #cache:
 #  paths:
