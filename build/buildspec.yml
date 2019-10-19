@@ -1,4 +1,8 @@
 # used by AWS CoOdePipeline to build and assemble artifacts
+# Docker example pulled from here
+# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-cd-pipeline.html
+#
+
 version: 0.2
 
 env:
@@ -60,10 +64,10 @@ artifacts:
       files:
         - cloudformation/batch.yaml
       discard-paths: yes
-#    artifact2:
-#      files:
-#        - target/messageUtil-1.0.jar
-#      discard-paths: yes
+    lambda:
+      files:
+      - lambda/src/**/*
+      discard-paths: no
 #cache:
 #  paths:
 #    - '/root/.m2/**/*'
