@@ -120,6 +120,7 @@ Resources:
     Type: "AWS::Lambda::Function"
     Properties:
       Code:
+        # todo: this should point to artifacts uploaded by pipeline
         ZipFile: |
           const AWS = require('aws-sdk');
           const batch = new AWS.Batch();

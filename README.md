@@ -1,6 +1,10 @@
 # aws-batch
 AWS-Batch example using Docker Image and Lambda
 
+## CodePipeline
+https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works
+
+
 ## Docker Image
 ###build from project root dir.
 `docker build -f build/Dockerfile -t j2clark/aws-batch:latest .`
@@ -17,6 +21,18 @@ AWS responds with a command to copy and paste
 * Note - AWS responds with invalid variable `-e none` at the end. Simply remove
 #### Push image to ECR
 `docker push 089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test:latest`
+
+
 ## AWS Batch Job
 
+
 ## Lambda Trigger
+tons of trouble getting lambda trigger to work.
+IAM batch policy is:
+```
+{
+    "Effect": "Allow",
+    "Action": "batch:*",
+    "Resource": "*"
+}
+```
