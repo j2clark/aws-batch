@@ -38,10 +38,10 @@ phases:
     commands:
       - echo Entered the post_build phase...
       - echo Build completed on `date`
-#artifacts:
-#  files:
-#    - target/messageUtil-1.0.jar
-#  discard-paths: yes
+artifacts:
+  files:
+    - batch/target/batch-1.0.jar
+  discard-paths: yes
 #  secondary-artifacts:
 #    artifact1:
 #      files:
