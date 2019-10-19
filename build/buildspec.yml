@@ -10,7 +10,8 @@ env:
 phases:
   install:
     runtime-versions:
-      java: openjdk8
+#      java: openjdk8
+      java: corretto8
     commands:
       - echo Entered the install phase...
       - apt-get update -y
