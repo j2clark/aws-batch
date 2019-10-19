@@ -43,7 +43,8 @@ artifacts:
     - batch/target/batch-1.0.jar
   discard-paths: yes
   secondary-artifacts:
-    artifact1:
+    # must add this to build artifacts
+    cloudformation:
       files:
         - cloudformation/batch.yaml
       discard-paths: yes
