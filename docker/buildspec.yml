@@ -50,9 +50,9 @@ phases:
   post_build:
     commands:
       - echo Entered the post_build phase...
-      - echo Build completed on `date`
-#      - docker push $REPOSITORY_URI:latest
-#      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Build completed on `date` - pushed docker image $REPOSITORY_URI:latest
 #cache:
 #  paths:
 #    - '/root/.m2/**/*'
