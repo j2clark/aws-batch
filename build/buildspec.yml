@@ -61,7 +61,7 @@ artifacts:
   secondary-artifacts:
     pipeline:
       files:
-        - /docker/**/*
+        - 'docker/**/*'
       discard-paths: no
     # must add this to build artifacts
     cloudformation:
