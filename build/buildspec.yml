@@ -31,12 +31,12 @@ phases:
     commands:
       - echo Entered the pre_build phase...
 #      - docker login –u User –p $LOGIN_PASSWORD
-      - echo Logging in to Amazon ECR...
-      - aws --version
-      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG=${COMMIT_HASH:=latest}
+#      - echo Logging in to Amazon ECR...
+#      - aws --version
+#      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+#      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
+#      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+#      - IMAGE_TAG=${COMMIT_HASH:=latest}
     finally:
       - echo This always runs even if the login command fails
   build:
@@ -44,8 +44,8 @@ phases:
       - echo Entered the build phase...
       - echo Build started on `date`
       - mvn install
-      - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+#      - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:latest .
+#      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
     finally:
       - echo This always runs even if the install command fails
   post_build:
