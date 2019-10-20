@@ -57,22 +57,29 @@ phases:
 artifacts:
   files:
     - 'batch/target/*.jar'
-  discard-paths: yes
-  secondary-artifacts:
-    pipeline:
-      files:
-        - 'docker/**/*'
-      discard-paths: no
-    # must add this to build artifacts
-    cloudformation:
-      files:
-        - 'cloudformation/batch.yaml'
-      discard-paths: yes
-    lambda:
-      files:
-      - '**/*'
-      base-directory: 'lambda/src'
-      discard-paths: no
+    - 'docker/**/*'
+    - 'lambda/src/**/*'
+    discard-paths: no
+#  files:
+#    - 'batch/target/*.jar'
+#  discard-paths: yes
+#  secondary-artifacts:
+#    pipeline:
+#      files:
+#        - 'batch/target/*.jar'
+#        - 'docker/**/*'
+#        - 'lambda/src/**/*'
+#      discard-paths: no
+#    # must add this to build artifacts
+#    cloudformation:
+#      files:
+#        - 'cloudformation/batch.yaml'
+#      discard-paths: yes
+#    lambda:
+#      files:
+#      - '**/*'
+#      base-directory: 'lambda/src'
+#      discard-paths: no
 #cache:
 #  paths:
 #    - '/root/.m2/**/*'
