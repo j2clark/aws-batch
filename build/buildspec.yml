@@ -59,7 +59,7 @@ artifacts:
     - 'batch/target/*.jar'
     - 'docker/**/*'
     - 'lambda/src/**/*'
-    discard-paths: no
+  discard-paths: no
 #  files:
 #    - 'batch/target/*.jar'
 #  discard-paths: yes
