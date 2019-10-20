@@ -35,7 +35,9 @@ phases:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo COMMIT_HASH ${COMMIT_HASH}
       - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo IMAGE_TAG ${IMAGE_TAG}
     finally:
       - echo This always runs even if the login command fails
   build:
