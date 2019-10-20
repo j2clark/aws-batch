@@ -45,7 +45,7 @@ ENV BATCH_HOME=$DOCKYARD_SRVPROJ
 COPY $DOCKYARD_SRC/docker/bin $DOCKYARD_SRVPROJ/bin
 
 # copy jar
-COPY $DOCKYARD_SRC/batch/target/batch-1.0.jar $DOCKYARD_SRVPROJ/jars/batch.jar
+COPY $DOCKYARD_SRC/batch-1.0.jar $DOCKYARD_SRVPROJ/jars/batch.jar
 
 # create user
 RUN useradd --create-home --shell /bin/bash batch
