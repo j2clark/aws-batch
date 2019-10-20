@@ -36,3 +36,8 @@ IAM batch policy is:
     "Resource": "*"
 }
 ```
+
+### CodePipeline
+
+java code -> docker deploy
+lambda code -> lambda deploy
