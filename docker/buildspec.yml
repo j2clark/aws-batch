@@ -40,19 +40,21 @@ phases:
       - echo This always runs even if the login command fails
   build:
     commands:
-#      - echo Entered the build phase...
-#      - echo Build started on `date`
-#      - mvn install
-      - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo Entered the build phase...
+      - echo Build started on `date`
+      # docker build requires elevated permissions
+      - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
     finally:
       - echo This always runs even if the install command fails
   post_build:
     commands:
       - echo Entered the post_build phase...
-      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Build completed on `date` - pushed docker image $REPOSITORY_URI:latest
+      - echo pushed docker image $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo pushed docker image $REPOSITORY_URI:latest
+      - echo Build completed on `date`
 #cache:
 #  paths:
 #    - '/root/.m2/**/*'
