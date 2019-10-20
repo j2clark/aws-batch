@@ -2,6 +2,8 @@
 # Docker example pulled from here
 # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-cd-pipeline.html
 #
+# https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+#
 
 version: 0.2
 
@@ -34,10 +36,11 @@ phases:
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo COMMIT_HASH ${COMMIT_HASH}
-      - IMAGE_TAG=${COMMIT_HASH:=latest}
-      - echo IMAGE_TAG ${IMAGE_TAG}
+#      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - COMMIT_HASH=$(echo $CODEBUILD_SOURCE_VERSION | cut -c 1-7)
+      - echo COMMIT_HASH $COMMIT_HASH
+      - IMAGE_TAG=$(COMMIT_HASH:=latest}
+      - echo IMAGE_TAG $IMAGE_TAG
     finally:
       - echo This always runs even if the login command fails
   build:
