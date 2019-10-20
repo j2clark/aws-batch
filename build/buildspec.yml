@@ -83,3 +83,5 @@ artifacts:
 cache:
   paths:
     - '/root/.m2/**/*'
+    - '/root/.npm/**/*'
+    - 'build/**/*'
