@@ -1,10 +1,6 @@
-[
-  {
-    "ParameterKey": "Environment",
-    "ParameterValue": "test"
-  },
-  {
-    "ParameterKey": "FunctionName",
-    "ParameterValue": "test"
+{
+  "Parameters" : {
+    "Environment" : "test",
+    "FunctionName" : "get"
   }
-]
+}
