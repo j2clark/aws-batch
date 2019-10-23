@@ -59,6 +59,7 @@ artifacts:
     - 'batch/target/*.jar'
     - 'docker/**/*'
     - 'lambda/src/**/*'
+    - 'cloudformation/lambda.yaml'
   discard-paths: no
 #  files:
 #    - 'batch/target/*.jar'
