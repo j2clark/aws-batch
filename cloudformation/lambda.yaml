@@ -1,0 +1,87 @@
+Description: >
+  Docker Batch Configuration
+
+Parameters:
+  # API GATEWAY PARAMS - BEGIN
+  ApiGatewayStageName:
+    Type: String
+    Default: "prod"
+    AllowedValues:
+      - 'prod'
+  CORSAllowHeaders:
+    Type: String
+    Default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  CORSAllowMethods:
+    Type: String
+    Default: "'DELETE,GET,HEAD,POST,OPTIONS,PUT,PATCH'"
+  CORSAllowOrigin:
+    Type: String
+    Default: "'*'"
+  # API GATEWAY PARAMS - END
+
+#Metadata:
+
+Resources:
+
+  GetFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          exports.handler = function (event, context, callback) {
+            console.log('get executed');
+            callback(null, {
+              statusCode: '200',
+              body: JSON.stringify({}),
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": "true"
+              }
+            });
+          }
+      Description: "Test Function"
+      FunctionName: "test-get"
+      Role: !GetAtt "LambdaIAMRole.Arn"
+      Handler: index.handler
+      Runtime: "nodejs8.10"
+      Timeout: 15
+
+
+  ### IAM ROLES - BEGIN
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    #    RoleName: "batch-lambda-role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Policies:
+        - PolicyName: "lambda"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+        - PolicyName: "dynamo"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "batch:SubmitJob"
+                  - "batch:ListJobs"
+                  - "batch:DescribeJobs"
+                Resource: "*"
+  ### IAM ROLES - END
