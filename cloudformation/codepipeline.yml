@@ -73,6 +73,25 @@ Resources:
 #            Ref: TagValue
 #          Type: KEY_AND_VALUE
 #      ServiceRoleArn: !GetAtt [CodeDeployEC2InstancesStack, Outputs.CodeDeployTrustRoleARN]
+
+  AppPipelineWebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+#        SecretToken: !Ref GitHubSecret
+        SecretToken: !Ref GitHubOAuthToken
+      Filters:
+        - JsonPath: $.ref
+          MatchEquals: 'refs/heads/{Branch}'
+      TargetPipeline: !Ref CodePipelineStack
+      TargetAction: Source
+      Name: AwsBatchPipelineWebhook
+      TargetPipelineVersion: !GetAtt
+        - CodePipelineStack
+        - Version
+      RegisterWithThirdParty: true
+
   CodePipelineStack:
     Type: AWS::CodePipeline::Pipeline
     Properties:
