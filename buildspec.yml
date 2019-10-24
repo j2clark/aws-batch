@@ -56,10 +56,12 @@ phases:
 #      - docker push $REPOSITORY_URI:$IMAGE_TAG
 artifacts:
   files:
+    - 'batch-api/src/**/*'
+#    - 'batch-api/src/package.json'
     - 'batch/target/*.jar'
     - 'docker/**/*'
-    - 'lambda/src/**/*'
-    - 'cloudformation/**/*'
+#    - 'lambda/src/**/*'
+#    - 'cloudformation/**/*'
   discard-paths: no
 #  files:
 #    - 'batch/target/*.jar'

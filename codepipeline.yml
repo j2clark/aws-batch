@@ -33,6 +33,7 @@ Metadata:
           - EmailAddress
 #          - EC2KeyPairName
 Resources:
+
   ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -105,6 +106,7 @@ Resources:
         - Name: Source
           Actions:
             - InputArtifacts: []
+              # this name is required
               Name: Source
               ActionTypeId:
                 Category: Source
@@ -122,18 +124,33 @@ Resources:
               RunOrder: 1
         - Name: Build
           Actions:
-            - Name: Build
+            - Name: BuildAction
               ActionTypeId:
                 Category: Build
                 Owner: AWS
                 Version: 1
                 Provider: CodeBuild
               OutputArtifacts:
-                - Name: MyAppBuild
+                - Name: AwsBuild
               InputArtifacts:
                 - Name: MyApp
               Configuration:
                 ProjectName: !Ref CodeBuildJavaProject
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+#              OutputArtifacts:
+#                - Name: MyAppBuild
+              InputArtifacts:
+                - Name: AwsBuild
+              Configuration:
+                ProjectName: !Ref CodeBuildDockerImage
               RunOrder: 1
 #        - Name: Deploy
 #          Actions:
@@ -149,19 +166,30 @@ Resources:
 #                ApplicationName: !Ref MyApplication
 #                DeploymentGroupName: !Ref MyDeploymentGroup
 #              RunOrder: 1
-  CodePipelineRole:
-    Type: AWS::IAM::Role
+
+  CodeBuildDockerImage:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildRole
     Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: Allow
-          Principal:
-            Service: codepipeline.amazonaws.com
-          Action: sts:AssumeRole
-      Path: /
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        Type: LINUX_CONTAINER
+        PrivilegedMode: true
+      Name: !Sub ${AWS::StackName}CodeBuildDockerImage
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'docker/buildspec.yml'
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_SOURCE_CACHE
+          - LOCAL_DOCKER_LAYER_CACHE
+          - LOCAL_CUSTOM_CACHE
+
 
   CodeBuildJavaProject:
     Type: AWS::CodeBuild::Project
@@ -177,7 +205,13 @@ Resources:
       ServiceRole: !Ref CodeBuildRole
       Source:
         Type: CODEPIPELINE
-        BuildSpec: 'build/buildspec.yml'
+#        BuildSpec: 'build/buildspec.yml'
+        BuildSpec: 'buildspec.yml'
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_SOURCE_CACHE
+          - LOCAL_CUSTOM_CACHE
 
   CodeBuildRole:
     Type: AWS::IAM::Role
@@ -191,6 +225,21 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
 
 Outputs:
   CodeBuildURL:

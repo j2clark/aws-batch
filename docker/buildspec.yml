@@ -15,7 +15,7 @@ env:
 
 # when configuring build in aws, there is option to choose environment
 # ubunutu seems more flexible? or at least better examples exist
-# fr example, aws doesn't support apt-get
+# for example, aws doesn't support apt-get
 
 phases:
   install:
@@ -37,16 +37,7 @@ phases:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
       - echo $CODEBUILD_BUILD_ID
-      # aws-batch-docker:319403a7-2ef1-4e47-90ac-145ba671380b
-#      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
-#      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-#      - COMMIT_HASH=$(echo $CODEBUILD_BUILD_ID | cut -c 1-7)
-#      - echo COMMIT_HASH $COMMIT_HASH
-#      -
-#      - IMAGE_TAG=$(COMMIT_HASH:=latest)
-#      - echo IMAGE_TAG $IMAGE_TAG
-#
 #      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 #      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
 
