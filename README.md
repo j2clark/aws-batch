@@ -41,3 +41,6 @@ IAM batch policy is:
 
 java code -> docker deploy
 lambda code -> lambda deploy
+
+examples:
+https://github.com/stelligent/cloudformation_templates/blob/master/labs/codebuild/codebuild.yml
