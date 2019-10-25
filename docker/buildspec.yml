@@ -35,7 +35,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
+#      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
+      - REPOSITORY_URI=${ECRRepository}
       - echo $CODEBUILD_BUILD_ID
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
 #      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
