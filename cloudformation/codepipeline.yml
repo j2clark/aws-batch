@@ -89,29 +89,28 @@ Resources:
               RunOrder: 1
         - Name: Build
           Actions:
-              - Name: BuildAction
-                ActionTypeId:
-                  Category: Build
-                  Owner: AWS
-                  Version: 1
-                  Provider: CodeBuild
-                InputArtifacts:
-                  - Name: SourceArtifact
-                OutputArtifacts:
-                  - Name: BuildArtifact
-                Configuration:
-                  ProjectName: !Ref CodeBuildJavaProject
-                RunOrder: 1
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: BuildArtifact
+              Configuration:
+                ProjectName: !Ref CodeBuildJavaProject
+              RunOrder: 1
         # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CloudFormation.html
         - Name: Deploy
           Actions:
-            - Name: Deploy
+            - Name: DeployStack
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
                 Version: 1
-              RunOrder: 1
               Configuration:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
@@ -122,8 +121,18 @@ Resources:
                 TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
               InputArtifacts:
                 - Name: BuildArtifact
-#              OutputArtifacts:
-#                - Name: DeployedArtifact
+              RunOrder: 1
+            - Name: BuildAndDeployDocker
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+                InputArtifacts:
+                  - Name: BuildArtifact
+                Configuration:
+                  ProjectName: !Ref CodeBuildDockerImage
+                RunOrder: 2
 
   CodeBuildJavaProject:
     Type: AWS::CodeBuild::Project
