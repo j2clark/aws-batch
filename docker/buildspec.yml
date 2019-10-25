@@ -36,7 +36,7 @@ phases:
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
 #      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
-      - echo 'ACCOUNT-ID: ${AccountID}'
+#      - echo 'ACCOUNT-ID: ${AccountID}'
       - REPOSITORY_URI='${AccountID}.dkr.ecr.${AWSRegion}.amazonaws.com/${Environment}-${AppName}-${AppVersion}'
       - echo $CODEBUILD_BUILD_ID
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
