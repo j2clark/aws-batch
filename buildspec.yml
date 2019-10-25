@@ -57,7 +57,7 @@ phases:
 artifacts:
   files:
     - 'batch-api/src/**/*'
-    - 'environment/**/*'
+    - 'cloudformation/**/*'
 #    - 'batch-api/src/package.json'
     - 'batch/target/*.jar'
     - 'docker/**/*'
