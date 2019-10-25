@@ -1,0 +1,134 @@
+Description: >
+  Batch Application Environment Configuration
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - 'test'
+      - 'prod'
+  AppName:
+    Type: String
+  AppVersion:
+    Type: String
+  ComputeSubnets:
+    Type: CommaDelimitedList
+    Default: 'subnet-d2971c8a,subnet-ad176fc9'
+  ComputeSecurityGroupIds:
+    Type: CommaDelimitedList
+    Default: 'sg-15583372'
+
+Resources:
+
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub '${Environment}-${AppName}-${AppVersion}'
+#      RepositoryPolicyText:
+#        Version: "2012-10-17"
+#        Statement:
+#          - Sid: CodeBuildPushPull
+#            Effect: Allow
+#            Principal:
+#              Service: codebuild.amazonaws.com
+#            Action:
+#              - ecr:GetDownloadUrlForLayer
+#              - ecr:BatchGetImage
+#              - ecr:BatchCheckLayerAvailability
+#              - ecr:PutImage
+#              - ecr:InitiateLayerUpload
+#              - ecr:UploadLayerPart
+#              - ecr:CompleteLayerUpload
+
+
+  BatchJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      Type: container
+      JobDefinitionName: !Sub '${Environment}-${AppName}-${AppVersion}-job'
+      ContainerProperties:
+        Image: !Ref ECRRepository
+        Vcpus: 1
+        Memory: 2000
+        Command: ["echo", "Hello World"]
+      RetryStrategy:
+        Attempts: 1
+
+  BatchJobCompute:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeEnvironmentName: !Sub '${Environment}-${AppName}-${AppVersion}-compute'
+      Type: MANAGED
+      ServiceRole: !Ref ComputeServiceRole
+      ComputeResources:
+        Type: EC2
+        MinvCpus: 0
+        MaxvCpus: 64
+        DesiredvCpus: 0
+        InstanceTypes:
+          - optimal
+        Subnets: !Ref ComputeSubnets
+#          - subnet-d2971c8a
+#          - subnet-ad176fc9
+        SecurityGroupIds: !Ref ComputeSecurityGroupIds
+#          - sg-15583372
+        InstanceRole: !Ref ComputeInstanceRole
+
+  BatchJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      Priority: 1
+      JobQueueName: !Sub '${Environment}-${AppName}-${AppVersion}-queue'
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref BatchJobCompute
+
+  ComputeServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-${AppName}-${AppVersion}-BatchServiceRole'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: 'batch.amazonaws.com'
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole'
+
+  ComputeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-${AppName}-${AppVersion}-EC2InstanceRole'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: 'ec2.amazonaws.com'
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role'
+
+Outputs:
+
+  ECRRepository:
+    Description: Docker Image Repository
+    Value: !Join ['', [!GetAtt [ECRRepository, Arn], ':latest']]
+    Export:
+      Name: !Sub "${Environment}-${AppName}-${AppVersion}-ECRRepository"
+
+  BatchJobDefinition:
+    Description: Batch Job Definition
+    Value: !Ref BatchJobDefinition
+    Export:
+      Name: !Sub "${Environment}-${AppName}-${AppVersion}-BatchJobDefinition"
+
+  BatchJobQueue:
+    Description: Batch Job Queue
+    Value: !Ref BatchJobQueue
+    Export:
+      Name: !Sub "${Environment}-${AppName}-${AppVersion}-BatchJobQueue"

@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "test",
+    "AppName": "batch-api",
+    "AppVersion": "v0"
+  }
+}
