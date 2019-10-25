@@ -1,0 +1,177 @@
+#
+AWSTemplateFormatVersion: "2010-09-09"
+Description: coordinates the dweployment of application - soup to nuts
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - 'test'
+      - 'prod'
+    Default: test
+  AppName:
+    Type: String
+    Default: batch-pipeline-test
+  AppVersion:
+    Type: String
+    Default: v0
+  EmailAddress:
+    Type: String
+    Default: 'j2clark@gmail.com'
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+  GitHubOwner:
+    Type: String
+    Default: j2clark
+  RepositoryName:
+    Description: GitHub repository name
+    Type: String
+    Default: aws-batch
+  RepositoryBranch:
+    Type: String
+    Default: master
+  S3ArtifactBucket:
+    Type: String
+    Default: codepipeline-us-west-1-348209300020
+#  StackName:
+
+Resources:
+
+  MySNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: String
+      Subscription:
+        - Endpoint: !Ref EmailAddress
+          Protocol: "email"
+      TopicName:
+        Ref: AWS::StackName
+
+  AppPipelineWebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubOAuthToken
+      Filters:
+        - JsonPath: $.ref
+          MatchEquals: 'refs/heads/{Branch}'
+      TargetPipeline: !Ref CodePipelineStack
+      TargetAction: Source
+      Name: !Sub '${Environment}-${AppName}-${AppVersion}-Webhook'
+      TargetPipelineVersion: !GetAtt [CodePipelineStack, Version]
+      RegisterWithThirdParty: true
+
+  CodePipelineStack:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn: !GetAtt [CodePipelineRole, Arn]
+      ArtifactStore:
+#        Location: !Ref ArtifactStoreBucket
+        Location: !Ref S3ArtifactBucket
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              InputArtifacts: []
+              OutputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Repo: !Ref RepositoryName
+                Branch: !Ref RepositoryBranch
+                OAuthToken: !Ref GitHubOAuthToken
+                PollForSourceChanges: false
+              RunOrder: 1
+        - Name: Build
+          Actions:
+              - Name: BuildAction
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Version: 1
+                  Provider: CodeBuild
+                InputArtifacts:
+                  - Name: SourceArtifact
+                OutputArtifacts:
+                  - Name: BuildArtifact
+                Configuration:
+                  ProjectName: !Ref CodeBuildJavaProject
+                RunOrder: 1
+        # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CloudFormation.html
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              RunOrder: 1
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+#                ParameterOverrides: '{"ProjectId": "my-project","CodeDeployRole": "CodeDeploy_Role_ARN"}'
+#                RoleArn: !Ref CodePipelineRole
+                RoleArn: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
+                StackName: !Sub '${Environment}-${AppName}-${AppVersion}-application'
+                TemplateConfiguration: !Sub 'BuildArtifact::cloudformation/environment/environment-params-${Environment}.json'
+                TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
+              InputArtifacts:
+                - Name: BuildArtifact
+#              OutputArtifacts:
+#                - Name: DeployedArtifact
+
+  CodeBuildJavaProject:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildRole
+    Properties:
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        Type: LINUX_CONTAINER
+      Name: !Sub ${AWS::StackName}CodeBuildJavaProject
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'buildspec.yml'
+      Artifacts:
+        Type: CODEPIPELINE
+      Cache:
+        Type: LOCAL
+        Modes:
+          - LOCAL_SOURCE_CACHE
+          - LOCAL_CUSTOM_CACHE
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codepipeline.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
