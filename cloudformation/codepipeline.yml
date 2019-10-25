@@ -129,6 +129,7 @@ Resources:
                 StackName: !Sub '${Environment}-${AppName}-${AppVersion}-application'
                 TemplateConfiguration: !Sub 'BuildArtifact::cloudformation/environment/environment-params-${Environment}.json'
                 TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
+                ParameterOverrides: !Sub '{"AppName": "${AppName}", "AppVersion": "${AppVersion}", "Environment": "${Environment}"}'
               InputArtifacts:
                 - Name: BuildArtifact
               RunOrder: 1
@@ -170,7 +171,7 @@ Resources:
             Value: !Ref AWS::Region
           - Name: AccountID
             Type: PLAINTEXT
-            Value: !Ref AWS::AccountID
+            Value: !Ref AWS::AccountId
       Name: !Sub ${AWS::StackName}CodeBuildJavaProject
       ServiceRole: !Ref CodeBuildRole
       Source:
@@ -210,7 +211,7 @@ Resources:
             Value: !Ref AWS::Region
           - Name: AccountID
             Type: PLAINTEXT
-            Value: !Ref AWS::AccountID
+            Value: !Ref AWS::AccountId
           - Name: ECRRepository
             Type: PLAINTEXT
             Value: !Sub '${Environment}-${AppName}-${AppVersion}'
