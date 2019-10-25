@@ -40,6 +40,8 @@ Parameters:
     Default: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
 
 
+  # TODO: the appname/version and parameters need to be passed on to CF docs, so everything is consistent throughout
+
 #  StackName:
 
 Resources:
@@ -153,6 +155,22 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:2.0
         Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: Environment
+            Type: PLAINTEXT
+            Value: !Ref Environment
+          - Name: AppName
+            Type: PLAINTEXT
+            Value: !Ref AppName
+          - Name: AppVersion
+            Type: PLAINTEXT
+            Value: !Ref AppVersion
+          - Name: AWSRegion
+            Type: PLAINTEXT
+            Value: !Ref AWS::Region
+          - Name: AccountID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountID
       Name: !Sub ${AWS::StackName}CodeBuildJavaProject
       ServiceRole: !Ref CodeBuildRole
       Source:
@@ -178,9 +196,25 @@ Resources:
         Type: LINUX_CONTAINER
         PrivilegedMode: true
         EnvironmentVariables:
+          - Name: Environment
+            Type: PLAINTEXT
+            Value: !Ref Environment
+          - Name: AppName
+            Type: PLAINTEXT
+            Value: !Ref AppName
+          - Name: AppVersion
+            Type: PLAINTEXT
+            Value: !Ref AppVersion
+          - Name: AWSRegion
+            Type: PLAINTEXT
+            Value: !Ref AWS::Region
+          - Name: AccountID
+            Type: PLAINTEXT
+            Value: !Ref AWS::AccountID
           - Name: ECRRepository
             Type: PLAINTEXT
-            Value: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Environment}-${AppName}-${AppVersion}'
+            Value: !Sub '${Environment}-${AppName}-${AppVersion}'
+#            Value: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Environment}-${AppName}-${AppVersion}'
       Name: !Sub ${AWS::StackName}CodeBuildDockerImage
       ServiceRole: !Ref CodeBuildRole
       Source:

@@ -1,8 +1,5 @@
 {
   "Parameters": {
-    "Environment": "test",
-    "AppName": "batch-api",
-    "AppVersion": "v1",
     "ComputeSubnets": "subnet-d2971c8a,subnet-ad176fc9",
     "ComputeSecurityGroupIds": "sg-15583372"
   }
