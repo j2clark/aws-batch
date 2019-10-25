@@ -33,6 +33,14 @@ Parameters:
   S3ArtifactBucket:
     Type: String
     Default: codepipeline-us-west-1-348209300020
+  CloudformationRole:
+    # this works, yet Cloudformation role below does not
+    # what am I doing wrong?
+    Type: String
+    Default: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
+
+
+#  StackName:
 
 Resources:
 
@@ -89,19 +97,19 @@ Resources:
               RunOrder: 1
         - Name: Build
           Actions:
-            - Name: BuildAction
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: 1
-                Provider: CodeBuild
-              InputArtifacts:
-                - Name: SourceArtifact
-              OutputArtifacts:
-                - Name: BuildArtifact
-              Configuration:
-                ProjectName: !Ref CodeBuildJavaProject
-              RunOrder: 1
+              - Name: BuildAction
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Version: 1
+                  Provider: CodeBuild
+                InputArtifacts:
+                  - Name: SourceArtifact
+                OutputArtifacts:
+                  - Name: BuildArtifact
+                Configuration:
+                  ProjectName: !Ref CodeBuildJavaProject
+                RunOrder: 1
         # https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CloudFormation.html
         - Name: Deploy
           Actions:
@@ -128,11 +136,14 @@ Resources:
                 Owner: AWS
                 Version: 1
                 Provider: CodeBuild
-                InputArtifacts:
-                  - Name: BuildArtifact
-                Configuration:
-                  ProjectName: !Ref CodeBuildDockerImage
-                RunOrder: 2
+              InputArtifacts:
+                - Name: BuildArtifact
+              Configuration:
+                ProjectName: !Ref CodeBuildDockerImage
+              RunOrder: 2
+
+  #              OutputArtifacts:
+#                - Name: DeployedArtifact
 
   CodeBuildJavaProject:
     Type: AWS::CodeBuild::Project
@@ -172,7 +183,6 @@ Resources:
             Value: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Environment}-${AppName}-${AppVersion}'
       Name: !Sub ${AWS::StackName}CodeBuildDockerImage
       ServiceRole: !Ref CodeBuildRole
-
       Source:
         Type: CODEPIPELINE
         BuildSpec: 'docker/buildspec.yml'
@@ -210,18 +220,19 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
-  CloudformationRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: Allow
-          Principal:
-            Service: cloudformation.amazonaws.com
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy
+#  CloudformationRole:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Version: "2012-10-17"
+#        Statement:
+#          Effect: Allow
+#          Principal:
+#            Service: cloudformation.amazonaws.com
+#          Action: sts:AssumeRole
+#      ManagedPolicyArns:
+#        - arn:aws:iam::aws:policy/AdministratorAccess
+##        - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy
 
 #Outputs:
 #
