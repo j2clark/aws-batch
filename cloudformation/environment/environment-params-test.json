@@ -2,6 +2,11 @@
   "Parameters": {
     "Environment": "test",
     "AppName": "batch-api",
-    "AppVersion": "v0"
+    "AppVersion": "v1",
+    "EmailAddress": "j2clark@gmail.com",
+    "GitHubOwner": "j2clark",
+    "RepositoryName": "aws-batch",
+    "RepositoryBranch": "master",
+    "S3ArtifactBucket": "codepipeline-us-west-1-348209300020"
   }
 }

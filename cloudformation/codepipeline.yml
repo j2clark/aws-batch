@@ -10,13 +10,10 @@ Parameters:
     Default: test
   AppName:
     Type: String
-    Default: batch-pipeline-test
   AppVersion:
     Type: String
-    Default: v0
   EmailAddress:
     Type: String
-    Default: 'j2clark@gmail.com'
   GitHubOAuthToken:
     Type: String
     NoEcho: true
@@ -33,14 +30,13 @@ Parameters:
   S3ArtifactBucket:
     Type: String
     Default: codepipeline-us-west-1-348209300020
-#  StackName:
 
 Resources:
 
   MySNSTopic:
     Type: "AWS::SNS::Topic"
     Properties:
-      DisplayName: String
+      DisplayName: !Sub '${Environment}-${AppName}-${AppVersion}-CodePipeline'
       Subscription:
         - Endpoint: !Ref EmailAddress
           Protocol: "email"
@@ -67,7 +63,6 @@ Resources:
     Properties:
       RoleArn: !GetAtt [CodePipelineRole, Arn]
       ArtifactStore:
-#        Location: !Ref ArtifactStoreBucket
         Location: !Ref S3ArtifactBucket
         Type: S3
       Stages:
@@ -118,8 +113,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
 #                ParameterOverrides: '{"ProjectId": "my-project","CodeDeployRole": "CodeDeploy_Role_ARN"}'
-#                RoleArn: !Ref CodePipelineRole
-                RoleArn: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
+                RoleArn: !Ref CloudformationRole
                 StackName: !Sub '${Environment}-${AppName}-${AppVersion}-application'
                 TemplateConfiguration: !Sub 'BuildArtifact::cloudformation/environment/environment-params-${Environment}.json'
                 TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
@@ -175,3 +169,16 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
+
+  CloudformationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: cloudformation.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy
