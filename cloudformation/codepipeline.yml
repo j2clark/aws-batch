@@ -10,10 +10,13 @@ Parameters:
     Default: test
   AppName:
     Type: String
+    Default: aws-batch-application
   AppVersion:
     Type: String
+    Default: v1
   EmailAddress:
     Type: String
+    Default: 'j2clark@gmail.com'
   GitHubOAuthToken:
     Type: String
     NoEcho: true
@@ -182,3 +185,11 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy
+
+#Outputs:
+#
+#  StackName:
+#    Description: Docker Image Repository
+#    Value: !Join ['', [!GetAtt [ECRRepository, Arn], ':latest']]
+#    Export:
+#      Name: !Sub "${Environment}-${AppName}-${AppVersion}-ECRRepository"
