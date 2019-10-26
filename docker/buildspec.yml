@@ -43,7 +43,7 @@ phases:
       - echo AppVersion [$AppVersion]
       - echo AppName [$Environment]
       - echo Region [$AWSRegion]
-      - REPOSITORY_URI = $AccountID.dkr.ecr.$AWSRegion.amazonaws.com/$Environment-$AppName-$AppVersion
+      - REPOSITORY_URI=$AccountID.dkr.ecr.$AWSRegion.amazonaws.com/$Environment-$AppName-$AppVersion
       - echo $REPOSITORY_URI
       - echo $CODEBUILD_BUILD_ID
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
