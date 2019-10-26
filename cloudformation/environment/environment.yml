@@ -13,10 +13,10 @@ Parameters:
     Type: String
   ComputeSubnets:
     Type: CommaDelimitedList
-    Default: 'subnet-d2971c8a,subnet-ad176fc9'
+#    Default: 'subnet-d2971c8a,subnet-ad176fc9'
   ComputeSecurityGroupIds:
     Type: CommaDelimitedList
-    Default: 'sg-15583372'
+#    Default: 'sg-15583372'
 
 Resources:
 

@@ -38,6 +38,12 @@ Parameters:
     # what am I doing wrong?
     Type: String
     Default: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
+  ComputeSubnets:
+    Type: CommaDelimitedList
+    Default: 'subnet-d2971c8a,subnet-ad176fc9'
+  ComputeSecurityGroupIds:
+    Type: CommaDelimitedList
+    Default: 'sg-15583372'
 
 
   # TODO: the appname/version and parameters need to be passed on to CF docs, so everything is consistent throughout
@@ -117,19 +123,18 @@ Resources:
           Actions:
             - Name: DeployStack
               ActionTypeId:
-                Category: Deploy
+                Category: DeployDocker
                 Owner: AWS
                 Provider: CloudFormation
                 Version: 1
               Configuration:
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
-#                ParameterOverrides: '{"ProjectId": "my-project","CodeDeployRole": "CodeDeploy_Role_ARN"}'
                 RoleArn: !Ref CloudformationRole
                 StackName: !Sub '${Environment}-${AppName}-${AppVersion}-application'
                 TemplateConfiguration: !Sub 'BuildArtifact::cloudformation/environment/environment-params-${Environment}.json'
                 TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
-                ParameterOverrides: !Sub '{"AppName": "${AppName}", "AppVersion": "${AppVersion}", "Environment": "${Environment}"}'
+                ParameterOverrides: !Sub '{"AppName": "${AppName}", "AppVersion": "${AppVersion}", "Environment": "${Environment}", "ComputeSubnets": "${ComputeSubnets}", "ComputeSecurityGroupIds": "ComputeSecurityGroupIds"}'
               InputArtifacts:
                 - Name: BuildArtifact
               RunOrder: 1
@@ -144,9 +149,6 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildDockerImage
               RunOrder: 2
-
-  #              OutputArtifacts:
-#                - Name: DeployedArtifact
 
   CodeBuildJavaProject:
     Type: AWS::CodeBuild::Project
@@ -267,12 +269,4 @@ Resources:
 #          Action: sts:AssumeRole
 #      ManagedPolicyArns:
 #        - arn:aws:iam::aws:policy/AdministratorAccess
-##        - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy
-
-#Outputs:
-#
-#  StackName:
-#    Description: Docker Image Repository
-#    Value: !Join ['', [!GetAtt [ECRRepository, Arn], ':latest']]
-#    Export:
-#      Name: !Sub "${Environment}-${AppName}-${AppVersion}-ECRRepository"
+#        - arn:aws:iam::089600871681:policy/AWSCloudFormationStackSetExecutionPolicy

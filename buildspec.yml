@@ -8,8 +8,6 @@ version: 0.2
 env:
   variables:
     JAVA_HOME: "/usr/lib/jvm/java-8-openjdk-amd64"
-#  parameter-store:
-#    LOGIN_PASSWORD: /CodeBuild/dockerLoginPassword
 
 # when configuring build in aws, there is option to choose environment
 # ubunutu seems more flexible? or at least better examples exist
@@ -20,70 +18,29 @@ phases:
     runtime-versions:
       java: openjdk8
     commands:
-      - echo Entered the install phase...
+#      - echo Entered the install phase...
       - apt-get update -y
       - apt-get install -y maven
-    finally:
-      - echo This always runs even if the update or install command fails
-  pre_build:
-    # policy had to be added to codebuild role to allow ECR access
-    # see bottom of  https://docs.aws.amazon.com/AmazonECR/latest/userguide/RepositoryPolicyExamples.html
-    commands:
-      - echo Entered the pre_build phase...
-#      - docker login –u User –p $LOGIN_PASSWORD
-#      - echo Logging in to Amazon ECR...
-#      - aws --version
-#      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-#      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
-#      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-#      - IMAGE_TAG=${COMMIT_HASH:=latest}
-    finally:
-      - echo This always runs even if the login command fails
   build:
     commands:
       - echo Entered the build phase...
       - echo Build started on `date`
       - mvn install
-#      - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:latest .
-#      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-    finally:
-      - echo This always runs even if the install command fails
+#      And now package Lambda
+#      https://advancedweb.hu/2018/12/18/lambda_cf_template/
+#      - or
+#      https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-deploying.html
   post_build:
     commands:
       - echo Entered the post_build phase...
       - echo Build completed on `date`
-#      - docker push $REPOSITORY_URI:latest
-#      - docker push $REPOSITORY_URI:$IMAGE_TAG
 artifacts:
   files:
     - 'batch-api/src/**/*'
     - 'cloudformation/**/*'
-#    - 'batch-api/src/package.json'
     - 'batch/target/*.jar'
     - 'docker/**/*'
-#    - 'lambda/src/**/*'
-#    - 'cloudformation/**/*'
   discard-paths: no
-#  files:
-#    - 'batch/target/*.jar'
-#  discard-paths: yes
-#  secondary-artifacts:
-#    pipeline:
-#      files:
-#        - 'batch/target/*.jar'
-#        - 'docker/**/*'
-#        - 'lambda/src/**/*'
-#      discard-paths: no
-#    # must add this to build artifacts
-#    cloudformation:
-#      files:
-#        - 'cloudformation/batch.yaml'
-#      discard-paths: yes
-#    lambda:
-#      files:
-#      - '**/*'
-#      base-directory: 'lambda/src'
-#      discard-paths: no
 cache:
   paths:
     - '/root/.m2/**/*'
