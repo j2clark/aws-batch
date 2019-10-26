@@ -39,10 +39,12 @@ Parameters:
     Type: String
     Default: 'arn:aws:iam::089600871681:role/AWSCloudFormationStackSetExecutionRole'
   ComputeSubnets:
-    Type: CommaDelimitedList
+#    Type: CommaDelimitedList
+    Type: String
     Default: 'subnet-d2971c8a,subnet-ad176fc9'
   ComputeSecurityGroupIds:
-    Type: CommaDelimitedList
+#    Type: CommaDelimitedList
+    Type: String
     Default: 'sg-15583372'
 
 
@@ -123,7 +125,7 @@ Resources:
           Actions:
             - Name: DeployStack
               ActionTypeId:
-                Category: DeployDocker
+                Category: Deploy
                 Owner: AWS
                 Provider: CloudFormation
                 Version: 1
