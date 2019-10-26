@@ -23,6 +23,7 @@ phases:
       java: openjdk8
     commands:
       - echo Entered the install phase...
+      - printenv
 #      - apt-get update -y
 #      - apt-get install -y maven
 #    finally:
@@ -38,8 +39,12 @@ phases:
 #      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
 #      - echo 'ACCOUNT-ID: ${AccountID}'
       - echo AccountID [$AccountID]
-      - echo AccountID [$AppName]
-      - REPOSITORY_URI='${AccountID}.dkr.ecr.${AWSRegion}.amazonaws.com/${Environment}-${AppName}-${AppVersion}'
+      - echo AppName [$AppName]
+      - echo AppVersion [$AppVersion]
+      - echo AppName [$Environment]
+      - echo Region [$AWSRegion]
+      - REPOSITORY_URI = $AccountID.dkr.ecr.$AWSRegion.amazonaws.com/$Environment-$AppName-$AppVersion'
+      - echo $REPOSITORY_URI
       - echo $CODEBUILD_BUILD_ID
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
 #      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
