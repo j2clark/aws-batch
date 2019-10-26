@@ -134,8 +134,8 @@ Resources:
                 Capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
                 RoleArn: !Ref CloudformationRole
                 StackName: !Sub '${Environment}-${AppName}-${AppVersion}-application'
-                TemplateConfiguration: !Sub 'BuildArtifact::cloudformation/environment/environment-params-${Environment}.json'
-                TemplatePath: 'BuildArtifact::cloudformation/environment/environment.yml'
+                TemplateConfiguration: !Sub 'BuildArtifact::application-params-${Environment}.json'
+                TemplatePath: 'BuildArtifact::application.yml'
                 ParameterOverrides: !Sub '{"AppName": "${AppName}", "AppVersion": "${AppVersion}", "Environment": "${Environment}", "ComputeSubnets": "${ComputeSubnets}", "ComputeSecurityGroupIds": "ComputeSecurityGroupIds"}'
               InputArtifacts:
                 - Name: BuildArtifact

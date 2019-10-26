@@ -36,13 +36,9 @@ phases:
       - echo Build completed on `date`
 artifacts:
   files:
-    - 'batch-api/src/**/*'
-    - 'cloudformation/**/*'
     - 'batch/target/*.jar'
     - 'docker/**/*'
   discard-paths: no
-cache:
-  paths:
-    - '/root/.m2/**/*'
-    - '/root/.npm/**/*'
-    - 'build/**/*'
+#cache:
+#  paths:
+#    - '/root/.m2/**/*'
