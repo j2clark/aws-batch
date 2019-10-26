@@ -1,5 +1,15 @@
 # AWS Code Pipeline
 
+## General Approach
+
+## Limitations
+
+It seems if there any fundamental changes, like security groups for compute, things get ugly
+The application stack is not able to update, and must be removed and redeployed.
+Removing the application stck itself is ugly, as the ECR Repo needs to be emptied first.
+Hopefully this is a misunderstanding/misconfiguration on my part 
+
+
 # Java/Docker Pipeline
 
 https://docs.aws.amazon.com/lambda/latest/dg/build-pipeline.html

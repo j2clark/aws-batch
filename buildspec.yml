@@ -38,6 +38,8 @@ artifacts:
   files:
     - 'batch/target/*.jar'
     - 'docker/**/*'
+    - 'application.yml'
+    - 'application-params-*.json'
   discard-paths: no
 #cache:
 #  paths:
