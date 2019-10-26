@@ -24,10 +24,6 @@ phases:
     commands:
       - echo Entered the install phase...
       - printenv
-#      - apt-get update -y
-#      - apt-get install -y maven
-#    finally:
-#      - echo This always runs even if the update or install command fails
   pre_build:
     # policy had to be added to codebuild role to allow ECR access
     # see bottom of  https://docs.aws.amazon.com/AmazonECR/latest/userguide/RepositoryPolicyExamples.html
@@ -36,26 +32,13 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-#      - REPOSITORY_URI=089600871681.dkr.ecr.us-west-1.amazonaws.com/batch-test
-#      - echo 'ACCOUNT-ID: ${AccountID}'
-#      - echo AccountID [$AccountID]
-#      - echo AppName [$AppName]
-#      - echo AppVersion [$AppVersion]
-#      - echo AppName [$Environment]
-#      - echo Region [$AWSRegion]
       - REPOSITORY_URI=$AccountID.dkr.ecr.$AWSRegion.amazonaws.com/$Environment-$AppName-$AppVersion
-      - echo RepositoryURI[$REPOSITORY_URI]
-      - echo CodebuildBuildId[$CODEBUILD_BUILD_ID]
+#      - echo RepositoryURI[$REPOSITORY_URI]
+#      - echo CodebuildBuildId[$CODEBUILD_BUILD_ID]
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F"-" '{print $7}')
-      - echo ImageTag[$IMAGE_TAG]
-#      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-#      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
-
-    finally:
-      - echo This always runs even if the login command fails
+#      - echo ImageTag[$IMAGE_TAG]
   build:
     commands:
-      - echo Entered the build phase...
       - echo Build started on `date`
       # docker build requires elevated permissions
       - docker build -f docker/build/Dockerfile -t $REPOSITORY_URI:$IMAGE_TAG .
